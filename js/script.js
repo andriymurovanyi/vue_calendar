@@ -30,7 +30,6 @@ new Vue({
 
         currentDay: null,
         languages: ["ru", "eng"],
-        prevYears: [],
 
         leftStop: false,
         rightStop: false,
@@ -43,19 +42,20 @@ new Vue({
         },
 
         createCalendar(year, month) {
-            this.rightStop = month >= 12;
-            this.leftStop = month <= 1;
+            this.rightStop = this.currentMonth > 11;
+            this.leftStop = this.currentMonth < 0;
 
             if (this.rightStop){
                 this.currentYear++;
-                this.currentMonth = 1;
+                this.currentMonth = 0;
                 console.log(this.currentYear);
             }
 
+
             if (this.leftStop){
                 this.currentYear--;
-                this.currentMonth = month % 12 + 1;
-                this.prevYears.push(this.currentYear);
+                this.currentMonth = 11;
+
                 console.log(this.currentYear);
             }
 
@@ -84,7 +84,7 @@ new Vue({
                 }
             }
 
-            tbody += '</tr></table>';
+            tbody += '</tr></tbody>';
 
             return tbody;
         },
@@ -95,18 +95,6 @@ new Vue({
             return day - 1;
         },
 
-        incMonth(){
-            this.currentMonth++;
-        },
-
-        decMonth(){
-            this.currentMonth--;
-        },
-
-        getMonth(){
-            return this.currentDate.getMonth()
-        },
-
         changeLocale(event){
             this.days = LOCALES[event.target.value].days;
             this.monthNames = LOCALES[event.target.value].months;
@@ -115,6 +103,16 @@ new Vue({
 
     changeYear(event){
         this.currentYear = event.target.value;
+    },
+    computed: {
+        incMonth(){
+            this.month++;
+
+        },
+
+        decMonth(){
+            this.month--;
+        },
     }
 
 });

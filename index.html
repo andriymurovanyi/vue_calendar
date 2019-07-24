@@ -17,9 +17,6 @@
         <div class="container pt-5">
 
             <div class="row">
-                <label>Choose year
-                    <input type="number">
-                </label>
                 <div class="container__locale">
                 <label for="select" class="ml-3">Choose language</label>
                 <select @change="changeLocale" id="select">
@@ -31,17 +28,17 @@
                         <tr class="justify-content-center ml-4">
                             <th colspan="7" >
                                 <button class="btn btn-outline-success"
-                                        @click="decMonth"
-                                        v-if="!leftStop"
+                                        @click="currentMonth = currentMonth - 1"
 
                                 > << </button>
+
                                 <a class="btn btn-outline-success disabled container__info">
                                     {{ getMonthName(currentMonth) }}, {{ currentYear }}
                                 </a>
 
                                 <button class="btn btn-outline-success"
-                                        @click="incMonth"
-                                        v-if="!rightStop"
+                                        @click="currentMonth = currentMonth + 1"
+
                                 > >> </button>
                             </th>
                         </tr>
