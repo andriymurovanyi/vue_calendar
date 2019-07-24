@@ -1,0 +1,122 @@
+const LOCALES = {
+    "ru": {
+        "days": ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"],
+        "months": ["Январь", "Февраль", "Март", "Апрель", "Май",
+            "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"]
+    },
+
+    "eng": {
+        "days": ["Mon", "Tue", "Web", "Thu", "Fri", "Sat", "Sun"] ,
+        "months": ["January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ]
+    }
+};
+
+new Vue({
+    el: "#app",
+
+    data: {
+        // Default locale
+        days: LOCALES.ru.days,
+        monthNames: LOCALES.ru.months,
+
+
+        currentDate: new Date(),
+        currentMonth: new Date().getMonth(),
+        // currentYear: new Date().getFullYear(),
+
+        currentYear: new Date().getFullYear(), // Default year
+
+        currentDay: null,
+        languages: ["ru", "eng"],
+        prevYears: [],
+
+        leftStop: false,
+        rightStop: false,
+        locale: null
+    },
+
+    methods: {
+        getMonthName(monthNumber){
+            return this.monthNames[monthNumber]
+        },
+
+        createCalendar(year, month) {
+            this.rightStop = month >= 12;
+            this.leftStop = month <= 1;
+
+            if (this.rightStop){
+                this.currentYear++;
+                this.currentMonth = 1;
+                console.log(this.currentYear);
+            }
+
+            if (this.leftStop){
+                this.currentYear--;
+                this.currentMonth = month % 12 + 1;
+                this.prevYears.push(this.currentYear);
+                console.log(this.currentYear);
+            }
+
+            let mon = month - 1; // Months starts from 0
+            let firstMonthDay = new Date(year, mon);
+
+            let tbody = '<tbody class="table table-bordered">';
+
+            for (let i = 0; i < this.getDay(firstMonthDay); i++) {
+                tbody += '<td></td>';
+            }
+
+            while (firstMonthDay.getMonth() === mon) {
+                tbody += '<td>' + firstMonthDay.getDate() + '</td>';
+
+                if (this.getDay(firstMonthDay) % 7 === 6) {
+                    tbody += '</tr><tr>';
+                }
+
+                firstMonthDay.setDate(firstMonthDay.getDate() + 1);
+            }
+
+            if (this.getDay(firstMonthDay) !== 0) {
+                for (let i = this.getDay(firstMonthDay); i < 7; i++) {
+                    tbody += '<td></td>';
+                }
+            }
+
+            tbody += '</tr></table>';
+
+            return tbody;
+        },
+
+        getDay(date) { // Week day number
+            let day = date.getDay();
+            if (day === 0) day = 7;
+            return day - 1;
+        },
+
+        incMonth(){
+            this.currentMonth++;
+        },
+
+        decMonth(){
+            this.currentMonth--;
+        },
+
+        getMonth(){
+            return this.currentDate.getMonth()
+        },
+
+        changeLocale(event){
+            this.days = LOCALES[event.target.value].days;
+            this.monthNames = LOCALES[event.target.value].months;
+        }
+    },
+
+    changeYear(event){
+        this.currentYear = event.target.value;
+    }
+
+});
+
+

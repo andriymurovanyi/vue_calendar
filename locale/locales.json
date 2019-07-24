@@ -1,0 +1,14 @@
+{
+  "ru": {
+    "days": ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"],
+    "months": ["Январь", "Февраль", "Март", "Апрель", "Май",
+      "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"]
+  },
+
+  "eng": {
+    "days": ["Mon", "Tue", "Web", "Thu", "Fri", "Sat", "Sun"] ,
+    "months": ["January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ]
+  }
+}
