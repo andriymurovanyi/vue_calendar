@@ -1,60 +1,27 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8">
     <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          content="width=device-width,
+          user-scalable=no,
+          initial-scale=1.0,
+          maximum-scale=1.0,
+          minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible"
+          content="ie=edge">
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
           integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
           crossorigin="anonymous">
-    <link rel="stylesheet" href="./css/style.css">
+
     <title>Calendar</title>
-</head>
-<body>
-    <div id="app">
-
-        <div class="container pt-5">
-
-            <div class="row">
-                <div class="container__locale">
-                <label for="select" class="ml-3">Choose language</label>
-                <select @change="changeLocale" id="select">
-                    <option v-for="language in languages">{{ language }}</option>
-                </select>
-            </div>
-                <table class="table table-bordered table-striped" id="main_table">
-                    <thead class="thead-light table__head">
-                        <tr class="justify-content-center ml-4">
-                            <th colspan="7" >
-                                <button class="btn btn-outline-success"
-                                        @click="currentMonth = currentMonth - 1"
-
-                                > << </button>
-
-                                <a class="btn btn-outline-success disabled container__info">
-                                    {{ getMonthName(currentMonth) }}, {{ currentYear }}
-                                </a>
-
-                                <button class="btn btn-outline-success"
-                                        @click="currentMonth = currentMonth + 1"
-
-                                > >> </button>
-                            </th>
-                        </tr>
-                        <tr>
-                            <th v-for="day in days">{{ day }}</th>
-                        </tr>
-                    </thead>
-                    <tbody v-html="createCalendar(currentYear, currentMonth % 12 + 1)"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="/dist/build.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script defer src="./js/script.js"></script>
-
-</body>
+  </body>
 </html>
