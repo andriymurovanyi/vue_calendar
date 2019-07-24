@@ -20,12 +20,9 @@ new Vue({
         // Default locale
         days: LOCALES.ru.days,
         monthNames: LOCALES.ru.months,
-
-
+        
         currentDate: new Date(),
         currentMonth: new Date().getMonth(),
-        // currentYear: new Date().getFullYear(),
-
         currentYear: new Date().getFullYear(), // Default year
 
         currentDay: null,
@@ -50,13 +47,11 @@ new Vue({
                 this.currentMonth = 0;
                 console.log(this.currentYear);
             }
-
-
+            
             if (this.leftStop){
                 this.currentYear--;
                 this.currentMonth = 11;
-
-                console.log(this.currentYear);
+                // console.log(this.currentYear);
             }
 
             let mon = month - 1; // Months starts from 0
