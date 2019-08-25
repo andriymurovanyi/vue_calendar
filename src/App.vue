@@ -60,42 +60,9 @@
 
 <script>
   import Header from "./components/header"
+  import locales from './locales/locales'
 
-  const LOCALES = {
-    names: {
-      rus: "Русский",
-      ukr: "Українська",
-      eng: "English"
-    },
-
-    rus: {
-      year: "Выберите год",
-      choose: "Выберите язык",
-      month: "Выберите месяц",
-      days: ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"],
-      months: ["Январь", "Февраль", "Март", "Апрель", "Май",
-        "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"]
-    },
-
-    eng: {
-      year: "Choose year",
-      choose: "Choose language",
-      month: "Choose month",
-      days: ["Mon", "Tue", "Web", "Thu", "Fri", "Sat", "Sun"] ,
-      months: ["January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"
-      ]
-    },
-
-    ukr: {
-      year: "Оберіть рік",
-      choose: "Оберіть мову",
-      month: "Оберіть місяць",
-      days: ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"],
-      months: ["Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень",
-              "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень"]
-    }
-  };
+  const LOCALES = locales.locales;
 
   export default {
     data() {
