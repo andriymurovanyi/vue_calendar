@@ -134,8 +134,6 @@ export default {
       set(value) {
         this.$i18n.locale = value;
         localStorage.setItem('locale', value);
-
-        this.calendarRender();
       }
     }
   },
@@ -252,30 +250,30 @@ export default {
 </script>
 
 <style>
-  .container__info {
-    width: 200px;
-  }
+.container__info {
+  width: 200px;
+}
 
-  th, td {
-    text-align: center;
-  }
+th, td {
+  text-align: center;
+}
 
-  td.active {
-    background: lightskyblue;
-  }
+td.active {
+  background: lightskyblue;
+}
 
-  label {
-    display: inline;
-  }
+label {
+  display: inline;
+}
 
-  .settings {
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    margin-bottom: 10px;
-    border-radius: 10px;
-    border: 1px grey solid;
-    padding: 15px;
-    width: 100%;
-  }
+.settings {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  border: 1px grey solid;
+  padding: 15px;
+  width: 100%;
+}
 </style>
