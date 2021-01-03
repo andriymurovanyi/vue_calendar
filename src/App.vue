@@ -1,243 +1,281 @@
 <template>
-  <div class="div">
-    <app-header ></app-header>
-    <div class="container pt-5">
-      <div class="row">
-        <div class="container__locale">
-          <div class="container__settings">
-            <label for="select_lang">{{ choose }}</label>
-            <select @change="changeLocale" id="select_lang">
-              <option v-for="language in languages">{{ language }}</option>
-            </select>
-          </div>
-          <label>
-            {{ yearText }}
-            <input type="number"
-                   min="1970"
-                   max="2040"
-                   :value="currentYear"
-                   @change="changeYear"
-                   @keypress.enter="changeYear"
+  <div id="app">
+    <app-header />
+    <div class="container pt-3">
+      <div class="settings">
+        <div class="settings__locale">
+          <label for="select_lang">{{ $t('selects.chooseLocale') }}</label>
+          <select
+            id="select_lang"
+            v-model="currentLocale"
+          >
+            <option
+              v-for="(language, index) in locales"
+              :value="language"
+              :key="index"
             >
-          </label>
-          <label for="select_month"> {{ monthText }} </label>
-          <select @change="changeMonth" id="select_month">
-            <option v-for="month in monthNames">{{ month }}</option>
+              {{ $t(`locales.${language}`) }}
+            </option>
           </select>
-          <p v-if="!isValidYear"
-             class="alert alert-danger">
-            Year not in range</p>
         </div>
-        <table class="table table-bordered table-striped" id="main_table">
-          <thead class="thead-light table__head">
-          <tr class="justify-content-center">
-            <th colspan="7">
-              <button class="btn btn-outline-success"
-                      @click="currentMonth = currentMonth - 1, clear()"
-              > << </button>
-              <a class="btn btn-outline-success disabled container__info">
-                {{ getMonthName(currentMonth) }}, {{ currentYear }}
-              </a>
-              <button class="btn btn-outline-success"
-                      @click="currentMonth = currentMonth + 1, clear()"
-              > >> </button>
-            </th>
-          </tr>
-          <tr>
-            <th v-for="day in days">{{ day }}</th>
-          </tr>
-          </thead>
-          <tbody>
-            <tr v-for="item in createCalendar(currentYear, currentMonth % 12 + 1)">
-              <td v-for="day in item"> {{ day }} </td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="settings__year">
+          <label for="select_year">{{ $t('selects.chooseYear') }}</label>
+          <input
+            id="select_year"
+            type="number"
+            v-model="currentYear"
+            @input="calendarRender"
+            @keydown.delete.prevent
+            :min="minYear"
+            :max="maxYear"
+          >
+        </div>
+        <div class="settings__month">
+          <label for="select_month"> {{ $t('selects.chooseMonth') }} </label>
+          <select
+            v-model="currentMonth"
+            @change="calendarRender"
+            id="select_month"
+          >
+            <option
+              v-for="(month, index) in months"
+              :key="index"
+              :value="month.value"
+            >{{ month.text }}
+            </option>
+          </select>
+        </div>
       </div>
+      <table class="table table-bordered table-striped" id="main_table">
+        <thead class="thead-light table__head">
+        <tr class="justify-content-center">
+          <th colspan="7">
+            <button
+              class="btn btn-outline-success"
+              @click="decreaseMonth"
+            > << </button>
+            <a class="btn btn-outline-success disabled container__info">
+              {{ currentDisplayDate }}
+            </a>
+            <button
+              class="btn btn-outline-success"
+              @click="increaseMonth"
+            > >> </button>
+          </th>
+        </tr>
+        <tr>
+          <th v-for="day in DAYS_COUNT" :key="day">
+            {{  $t(`days.${day === 7 ? 0 : day}`) }}
+          </th>
+        </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(item, rowIndex) in calendar" :key="rowIndex">
+            <td
+              v-for="(day, cellIndex) in item"
+              :key="`day_${cellIndex}`"
+              :class="{ active: day == currentDate.getDate() }"
+            >
+              {{ day }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
+    <v-alert v-if="!isValidYear" message="Year not in range" />
   </div>
 </template>
 
 <script>
-  import Header from "./components/header"
-  import locales from './locales/locales'
+import Header from '@/components/header'
+import Alert from '@/components/alert'
 
-  const LOCALES = locales.locales;
+export default {
+  components: {
+    appHeader: Header,
+    'v-alert': Alert
+  },
+  data: () => ({
+    DAYS_COUNT: 7,
+    MONTHS_COUNT: 12,
+    minYear: 1970,
+    maxYear: 2040,
 
-  export default {
-    data() {
-      return {
-        choose: LOCALES.ukr.choose,
-        days: LOCALES.ukr.days,
-        monthNames: LOCALES.ukr.months,
-        yearText: LOCALES.ukr.year,
-        monthText: LOCALES.ukr.month,
+    locales: [],
+    currentDate: new Date(),
+    currentMonth: new Date().getMonth(),
+    currentYear: new Date().getFullYear(), // Default year
+    calendar: new Object({}),
 
-        currentDate: new Date(),
-        currentMonth: new Date().getMonth(),
-        currentYear: new Date().getFullYear(), // Default year
-        currentDay: null,
-        calendar: new Object({}),
+    leftStop: false,
+    rightStop: false,
+    locale: null,
+    outOfRange: false,
 
-        languages: [LOCALES.names.ukr, LOCALES.names.rus, LOCALES.names.eng],
+    isValidYear: true,
+    isValidMonth: true
+  }),
+  computed:{
+    currentDisplayDate() {
+      return `${this.$t(`months.${this.currentMonth}`)}, ${this.currentYear}`
+    },
+    months() {
+      return Array.from({
+        length: this.MONTHS_COUNT
+      }, (it, index) => ({
+        text: this.$t(`months.${index}`),
+        value: index
+      }));
+    },
+    currentLocale: {
+      get() {
+        return this.$i18n.locale;
+      },
+      set(value) {
+        this.$i18n.locale = value;
+        localStorage.setItem('locale', value);
 
-        leftStop: false,
-        rightStop: false,
-        locale: null,
-        outOfRange: false,
-
-        isValidYear: true,
-        isValidMonth: true
+        this.calendarRender();
       }
+    }
+  },
+  watch: {
+    currentYear(val) {
+      this.isValidYear = !!(
+        val > this.minYear &&
+        val < this.maxYear
+      );
+    }
+  },
+  created() {
+    this.locales = [...this.$i18n.availableLocales];
+    this.calendarRender();
+  },
+  methods: {
+    increaseMonth() {
+      this.currentMonth++;
+      this.clear();
+
+      this.calendarRender();
     },
 
-    methods: {
-      getMonthName(monthNumber) {
-        return this.monthNames[monthNumber]
-      },
+    decreaseMonth() {
+      this.currentMonth--;
+      this.clear();
 
-      createCalendar(year, month) {
-        let close = false;
-        this.rightStop = this.currentMonth > 11;
-        this.leftStop = this.currentMonth < 0;
-
-        if (this.rightStop) {
-          this.currentYear++;
-          this.currentMonth = 0;
-        }
-
-        if (this.leftStop) {
-          this.currentYear--;
-          this.currentMonth = 11;
-          // console.log(this.currentYear);
-        }
-
-        let mon = month - 1; // Months starts from 0
-        let firstMonthDay = new Date(year, mon);
-        //
-        let calendarData = [];
-        for (let i = 0; i < this.getDay(firstMonthDay); i++) {
-          calendarData.push(null);
-        }
-
-
-        while (firstMonthDay.getMonth() === mon) {
-          calendarData.push(firstMonthDay.getDate());
-
-          if (this.getDay(firstMonthDay) % 7 === 6) {
-            this.outOfRange = true;
-            calendarData.push(this.outOfRange)
-          }
-
-          firstMonthDay.setDate(firstMonthDay.getDate() + 1);
-        }
-
-        if (this.getDay(firstMonthDay) !== 0) {
-          for (let i = this.getDay(firstMonthDay); i < 7; i++) {
-            calendarData.push(null);
-          }
-        }
-
-        close = true;
-        calendarData.push(close);
-
-        calendarData.push(close);
-
-        let tmp = [];
-        let j = 0;
-        for (let i = 0; i < calendarData.length; i++){
-          if (calendarData[i] !== true){
-            tmp.push(calendarData[i]);
-          } else {
-            this.calendar[j] = tmp;
-            tmp = [];
-            j++;
-          }
-        }
-        return this.calendar;
-      },
-
-      getDay(date) { // Week day number
-        let day = date.getDay();
-        if (day === 0) day = 7;
-        return day - 1;
-      },
-
-      changeLocale(event) {
-        this.days = LOCALES[this.getKeyByValue(LOCALES.names, event.target.value)].days;
-        this.monthNames = LOCALES[this.getKeyByValue(LOCALES.names, event.target.value)].months;
-        this.choose = LOCALES[this.getKeyByValue(LOCALES.names, event.target.value)].choose;
-        this.yearText = LOCALES[this.getKeyByValue(LOCALES.names, event.target.value)].year;
-        this.monthText = LOCALES[this.getKeyByValue(LOCALES.names, event.target.value)].month;
-      },
-
-      getKeyByValue(object, value) {
-        return Object.keys(object).find(key => object[key] === value);
-      },
-
-      clear(){
-        for (let key in this.calendar){
-          delete this.calendar[key];
-        }
-      },
-
-      changeYear(event) {
-        let maxYear = event.target.max;
-        let minYear = event.target.min;
-        if (event.target.value && event.target.value >= minYear && event.target.value <= maxYear){
-          this.currentYear = event.target.value;
-          console.log(event.keyCode);
-          this.isValidYear = true;
-        }
-        else{
-          this.isValidYear = false;
-          event.target.value = this.currentYear;
-        }
-      },
-
-      changeMonth(event) {
-        let selectedMonth = event.target.value;
-        selectedMonth = this.monthNames[event.target.value];
-        console.log(selectedMonth);
-
-        // console.log(event.keyCode);
-        // this.isValidMonth = true;
-        this.currentMonth = this.monthNames.indexOf(event.target.value);
-        console.log(this.currentMonth);
-        }
-
+      this.calendarRender();
     },
 
-    computed:{
-      incMonth(){
-        this.month++;
+    calendarRender() {
+      this.rightStop = this.currentMonth > 11;
+      this.leftStop = this.currentMonth < 0;
 
-      },
-
-      decMonth(){
-        this.month--;
+      if (this.rightStop) {
+        this.currentYear++;
+        this.currentMonth = 0;
       }
 
-    },
-    components:{
-      appHeader: Header
+      if (this.leftStop) {
+        this.currentYear--;
+        this.currentMonth = 11;
+      }
+
+      const normalizedMonth = this.currentMonth % 12;
+      const chosenDate = new Date(this.currentYear, normalizedMonth); // First month day as Date
+      const monthStartWeekday = this.getDay(chosenDate); // First month day as Number
+      // Spaces for the first row
+      // from Monday to the first day of the month
+      // * * * 1 2 3 4
+      const calendarData = new Array(
+        monthStartWeekday
+      ).fill(null, 0, monthStartWeekday);
+
+      while (chosenDate.getMonth() === normalizedMonth) {
+        calendarData.push(chosenDate.getDate());
+
+        // It's Sunday, so need to add break line
+        if (this.getDay(chosenDate) % 7 === 6) {
+          this.outOfRange = true;
+          calendarData.push('line-break');
+        }
+
+        chosenDate.setDate(chosenDate.getDate() + 1);
+      }
+
+      // Finish the table with empty cells, if necessary
+      // 29 30 31 * * * *
+      if (this.getDay(chosenDate) !== 0) {
+        const maxWeekDays = 7;
+        const emptyBoxesCount = maxWeekDays - this.getDay(chosenDate);
+
+        const emptyBoxes = Array.from({
+          length: emptyBoxesCount
+        }, () => null)
+
+        calendarData.push(...emptyBoxes);
+      }
+
+      calendarData.push('line-break');
+
+      let rowData = [];
+      let rowIndex = 0;
+
+      calendarData.forEach(item => {
+        if (item !== 'line-break') {
+          rowData.push(item);
+        } else {
+          this.calendar[rowIndex] = rowData;
+          rowData = [];
+          rowIndex++;
+        }
+      });
     },
 
+    getDay(date) {
+      // Week day number
+      let day = date.getDay();
+
+      if (day === 0) {
+        day = 7;
+      }
+
+      return day - 1;
+    },
+
+    clear() {
+      Object.getOwnPropertyNames(this.calendar).forEach(prop => {
+        delete this.calendar[prop];
+      });
+    }
   }
+}
 </script>
 
 <style>
-  .container__info{
+  .container__info {
     width: 200px;
   }
 
-  th{
+  th, td {
     text-align: center;
   }
 
-  td:hover{
+  td.active {
     background: lightskyblue;
   }
 
+  label {
+    display: inline;
+  }
 
+  .settings {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    border: 1px grey solid;
+    padding: 15px;
+    width: 100%;
+  }
 </style>
